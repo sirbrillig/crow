@@ -8,12 +8,17 @@ const firstBranchName = 'my-branch';
 
 describe( 'crow', function() {
 	let crow;
+	let myFs;
 
 	beforeEach( function() {
-		const myFs = mockFs.fs( {
-			[ mockRootDir ]: {}
+		myFs = mockFs.fs( {
+			[ mockRootDir ]: {
+				refs: {
+					heads: {}
+				}
+			}
 		} );
-		crow = new Crow( mockRootDir, myFs );
+		crow = new Crow( mockRootDir, { fs: myFs } );
 	} );
 
 	describe( '.getRootDir', function() {
@@ -27,9 +32,14 @@ describe( 'crow', function() {
 			expect( crow.getBranchFile() ).to.eql( null );
 		} );
 
-		it( 'returns the full path to the branch directory when there is a branch set', function() {
+		it( 'returns the full path to the current branch directory when there is a branch set', function() {
 			crow.setCurrentBranch( firstBranchName );
 			expect( crow.getBranchFile() ).to.eql( `${mockRootDir}/refs/heads/${firstBranchName}` );
+		} );
+
+		it( 'returns the full path to the named branch directory when provided', function() {
+			const otherBranchName = 'other-branch';
+			expect( crow.getBranchFile( otherBranchName ) ).to.eql( `${mockRootDir}/refs/heads/${otherBranchName}` );
 		} );
 	} );
 
@@ -45,18 +55,25 @@ describe( 'crow', function() {
 	} );
 
 	describe( '.getCurrentBranchHead', function() {
+		it( 'throws an error if the root dir does not exist', function() {
+			myFs = mockFs.fs( {} );
+			crow = new Crow( mockRootDir, { fs: myFs } );
+			expect( crow.getCurrentBranchHead.bind( crow ) ).to.throw();
+		} );
+
 		it( 'returns null if no branch has been set', function() {
 			expect( crow.getCurrentBranchHead() ).to.eql( null );
 		} );
 
 		it( 'returns null if no commits have been made to a new branch', function() {
+			crow.createNewBranch( firstBranchName );
 			crow.setCurrentBranch( firstBranchName );
 			expect( crow.getCurrentBranchHead() ).to.eql( null );
 		} );
 
 		it( 'returns the last commit hash on the branch if one has been made', function() {
 			const commitA = 'abcd';
-			const myFs = mockFs.fs( {
+			myFs = mockFs.fs( {
 				[ mockRootDir ]: {
 					refs: {
 						heads: {
@@ -65,9 +82,35 @@ describe( 'crow', function() {
 					}
 				}
 			} );
-			crow = new Crow( mockRootDir, myFs );
+			crow = new Crow( mockRootDir, { fs: myFs } );
 			crow.setCurrentBranch( firstBranchName );
 			expect( crow.getCurrentBranchHead() ).to.eql( commitA );
+		} );
+	} );
+
+	describe( '.createNewBranch', function() {
+		it( 'creates a new branch file if one does not exist', function() {
+			crow.createNewBranch( 'new-branch' );
+			expect( myFs.accessSync.bind( myFs, `${mockRootDir}/refs/heads/new-branch` ) ).to.not.throw();
+		} );
+
+		it( 'creates an empty branch file', function() {
+			crow.createNewBranch( 'new-branch' );
+			expect( myFs.readFileSync( `${mockRootDir}/refs/heads/new-branch`, 'utf8' ) ).to.eql( '' );
+		} );
+
+		it( 'fails if that branch file already exists', function() {
+			myFs = mockFs.fs( {
+				[ mockRootDir ]: {
+					refs: {
+						heads: {
+							[ firstBranchName ]: 'abcd'
+						}
+					}
+				}
+			} );
+			crow = new Crow( mockRootDir, { fs: myFs } );
+			expect( crow.createNewBranch.bind( crow, firstBranchName ) ).to.throw();
 		} );
 	} );
 } );

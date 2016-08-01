@@ -4,4 +4,7 @@ module.exports = {
 		mocha: true,
 		node: true
 	},
+	'rules': {
+		'max-len': 0,
+	},
 };
