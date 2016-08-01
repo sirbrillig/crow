@@ -6,7 +6,6 @@ import FileManager from './lib/file-manager';
 class Crow {
 	constructor( dir, options = {} ) {
 		this.rootDir = dir;
-		this.currentBranchName = null;
 		this.files = new FileManager( { fs: options.fs || fs } );
 	}
 
@@ -14,19 +13,27 @@ class Crow {
 		return this.rootDir;
 	}
 
+	getHeadFile() {
+		return path.join( this.getRootDir(), 'HEAD' );
+	}
+
 	setCurrentBranch( name ) {
-		this.currentBranchName = name;
+		this.files.writeFile( this.getHeadFile(), name );
 	}
 
 	getCurrentBranch() {
-		return this.currentBranchName;
+		if ( ! this.files.doesFileExist( this.getHeadFile() ) ) {
+			return null;
+		}
+		return this.files.getFileContents( this.getHeadFile() );
 	}
 
 	getBranchFile( name ) {
-		if ( ! name && ! this.currentBranchName ) {
+		const currentBranchName = this.getCurrentBranch();
+		if ( ! name && ! currentBranchName ) {
 			return null;
 		}
-		return path.join( this.getRootDir(), 'refs', 'heads', name || this.currentBranchName );
+		return path.join( this.getRootDir(), 'refs', 'heads', name || currentBranchName );
 	}
 
 	getCurrentBranchHead() {

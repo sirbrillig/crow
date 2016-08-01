@@ -113,4 +113,22 @@ describe( 'crow', function() {
 			expect( crow.createNewBranch.bind( crow, firstBranchName ) ).to.throw();
 		} );
 	} );
+
+	describe( '.setCurrentBranch', function() {
+		it( 'fails if the root directory does not exist', function() {
+			myFs = mockFs.fs( {} );
+			crow = new Crow( mockRootDir, { fs: myFs } );
+			expect( crow.setCurrentBranch.bind( crow ) ).to.throw();
+		} );
+
+		it( 'sets the current branch', function() {
+			crow.setCurrentBranch( firstBranchName );
+			expect( crow.getCurrentBranch() ).to.eql( firstBranchName );
+		} );
+
+		it( 'writes the current branch to the HEAD file', function() {
+			crow.setCurrentBranch( firstBranchName );
+			expect( myFs.readFileSync( `${mockRootDir}/HEAD`, 'utf8' ) ).to.eql( firstBranchName );
+		} );
+	} );
 } );
