@@ -1,8 +1,8 @@
 {
-  "name": "crow",
+  "name": "deg",
   "version": "1.0.0",
   "description": "A lightweight DVCS that can exist on top of other VCSes",
-  "main": "crow.js",
+  "main": "deg.js",
   "scripts": {
     "test": "mocha --require babel-register"
   },
@@ -31,10 +31,10 @@
   "dependencies": {},
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/sirbrillig/crow.git"
+    "url": "git+https://github.com/sirbrillig/deg.git"
   },
   "bugs": {
-    "url": "https://github.com/sirbrillig/crow/issues"
+    "url": "https://github.com/sirbrillig/deg/issues"
   },
-  "homepage": "https://github.com/sirbrillig/crow#readme"
+  "homepage": "https://github.com/sirbrillig/deg#readme"
 }

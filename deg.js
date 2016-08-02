@@ -3,7 +3,7 @@ import fs from 'fs';
 
 import FileManager from './lib/file-manager';
 
-class Crow {
+class Deg {
 	constructor( dir, options = {} ) {
 		this.rootDir = dir;
 		this.files = new FileManager( { fs: options.fs || fs } );
@@ -60,8 +60,8 @@ class Crow {
 	}
 }
 
-export default Crow;
+export default Deg;
 
-export function getCrowAt( dir, options = {} ) {
-	return new Crow( dir, options );
+export function getDegAt( dir, options = {} ) {
+	return new Deg( dir, options );
 }
